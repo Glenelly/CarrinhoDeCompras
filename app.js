@@ -133,12 +133,6 @@ function updateInvoice() {
     invoice.innerHTML += `<p>Total: R$${total}</p>`;
 }
 
-function removeFromCart(index) {
-    cart.splice(index, 1);
-    localStorage.setItem('cart', JSON.stringify(cart)); // Atualiza o LocalStorage após remover um item
-    updateCartDisplay();
-}
-
 function finalizePurchase() {
     console.log("Finalizar compra chamada");
     const total = calculateTotal();
@@ -159,6 +153,28 @@ function finalizePurchase() {
 
     console.log('Carrinho limpo e redirecionando para a página de detalhes do pedido.');
     window.location.href = "orderDetails.html";
+
+     // Coleta os dados do usuário e do carrinho
+     const orderDetails2 = {
+        userData: userData, // Certifique-se de que userData contém as informações do usuário
+        cart: cart,         // O carrinho deve ser uma lista de itens que o usuário quer comprar
+        total: calculateTotal(), // Uma função que calcula o total com base nos itens do carrinho
+        timestamp: firebase.database.ServerValue.TIMESTAMP // Captura o momento exato da compra
+    };
+
+    // Referência para o local no banco de dados onde os pedidos são armazenados
+    var ordersRef = firebase.database().ref('orders');
+
+    // Cria um novo pedido no Firebase Database
+    ordersRef.push(orderDetails2)
+        .then(() => {
+            console.log('Pedido armazenado com sucesso no Firebase');
+            // Ações adicionais após o sucesso, como redirecionamento ou exibição de mensagem
+        })
+        .catch((error) => {
+            console.error('Erro ao armazenar o pedido: ', error);
+        });
+    
 }
 
 function calculateTotal() {
@@ -169,7 +185,6 @@ function calculateTotal() {
     });
     return total;
 }
-
 
 
 
